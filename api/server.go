@@ -14,17 +14,21 @@ import (
 func main() {
 	app := fiber.New()
 
-	// Routes
-	app.Get("/api/posts", controllers.GetAll)
-	app.Get("/api/posts/:id", controllers.GetById)
-	app.Post("/api/posts", controllers.Create)
-	app.Delete("/api/posts/:id", controllers.Delete)
+	setUpRoutes(app)
 
 	err := app.Listen(8000)
 
 	if err != nil {
 		panic(err)
 	}
+}
+
+func setUpRoutes(app *fiber.App) {
+	app.Get("/api/posts", controllers.GetAll)
+	app.Get("/api/posts/:id", controllers.GetById)
+	app.Post("/api/posts", controllers.Create)
+	app.Patch("/api/posts/:id", controllers.Update)
+	app.Delete("/api/posts/:id", controllers.Delete)
 }
 
 func init() {

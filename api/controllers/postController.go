@@ -88,7 +88,57 @@ func Create(ctx *fiber.Ctx) {
 	})
 }
 
-// DELETE /api/posts
+// PATCH /api/posts/:id
+func Update(ctx *fiber.Ctx) {
+	id := ctx.Params("id")
+
+	post := &models.Post{}
+
+	collection := mgm.Coll(post)
+
+	err := collection.FindByID(id, post)
+
+	if err != nil {
+		ctx.Status(404).JSON(fiber.Map{
+			"ok":    false,
+			"error": "Post not found",
+		})
+		return
+	}
+
+	params := new(struct {
+		Content string
+	})
+
+	ctx.BodyParser(&params)
+
+	if len(params.Content) == 0 {
+		ctx.Status(400).JSON(fiber.Map{
+			"ok":    false,
+			"error": "Content not specified.",
+		})
+		return
+	}
+
+	post.Content = params.Content
+
+	err = collection.Update(post)
+
+	if err != nil {
+		ctx.Status(500).JSON(fiber.Map{
+			"ok":    false,
+			"error": err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(fiber.Map{
+		"ok":   true,
+		"post": post,
+	})
+}
+
+// DELETE /api/posts/:id
 func Delete(ctx *fiber.Ctx) {
 	id := ctx.Params("id")
 
