@@ -3,12 +3,14 @@ package controllers
 import (
 	"github.com/Kamva/mgm/v2"
 	"github.com/YonchevSimeon/fiber-mongodb-vue/models"
-	"github.com/gofiber/fiber"
+	"github.com/YonchevSimeon/fiber-mongodb-vue/utils"
+
+	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func Login(ctx *fiber.Ctx) {
+func Login(ctx *fiber.Ctx) error {
 	params := new(struct {
 		Username string
 		Password string
@@ -23,30 +25,37 @@ func Login(ctx *fiber.Ctx) {
 	usernameErr := collection.FindOne(ctx.Context(), bson.M{"username": params.Username}).Decode(&user)
 
 	if usernameErr != nil {
-		ctx.Status(400).JSON(fiber.Map{
+		return ctx.Status(400).JSON(fiber.Map{
 			"ok":    false,
 			"error": "Account with this username does NOT exist!",
 		})
-		return
 	}
 
 	match := checkPasswordHash(params.Password, user.Password)
 
 	if !match {
-		ctx.Status(400).JSON(fiber.Map{
+		return ctx.Status(400).JSON(fiber.Map{
 			"ok":    false,
 			"error": "Wrong password, please try again!",
 		})
-		return
 	}
 
-	ctx.JSON(fiber.Map{
-		"ok": true,
+	token, err := utils.GenerateJwtToken()
+	if err != nil {
+		return ctx.Status(500).JSON(fiber.Map{
+			"ok":    false,
+			"error": err.Error(),
+		})
+	}
+
+	return ctx.JSON(fiber.Map{
+		"ok":    true,
+		"token": token,
 	})
 
 }
 
-func Register(ctx *fiber.Ctx) {
+func Register(ctx *fiber.Ctx) error {
 	params := new(struct {
 		Email    string
 		Username string
@@ -60,23 +69,20 @@ func Register(ctx *fiber.Ctx) {
 	passwordErr := isValidPassword(params.Password)
 
 	if len(emailErr) != 0 {
-		ctx.Status(400).JSON(fiber.Map{
+		return ctx.Status(400).JSON(fiber.Map{
 			"ok":    false,
 			"error": emailErr,
 		})
-		return
 	} else if len(usernameErr) != 0 {
-		ctx.Status(400).JSON(fiber.Map{
+		return ctx.Status(400).JSON(fiber.Map{
 			"ok":    false,
 			"error": usernameErr,
 		})
-		return
 	} else if len(passwordErr) != 0 {
-		ctx.Status(400).JSON(fiber.Map{
+		return ctx.Status(400).JSON(fiber.Map{
 			"ok":    false,
 			"error": passwordErr,
 		})
-		return
 	}
 
 	hashPassword, _ := hashPassword(params.Password)
@@ -86,14 +92,13 @@ func Register(ctx *fiber.Ctx) {
 	err := mgm.Coll(user).Create(user)
 
 	if err != nil {
-		ctx.Status(500).JSON(fiber.Map{
+		return ctx.Status(500).JSON(fiber.Map{
 			"ok":    false,
 			"error": err.Error(),
 		})
-		return
 	}
 
-	ctx.JSON(fiber.Map{
+	return ctx.JSON(fiber.Map{
 		"ok": true,
 	})
 
