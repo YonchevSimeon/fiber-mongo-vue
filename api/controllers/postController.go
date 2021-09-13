@@ -3,12 +3,12 @@ package controllers
 import (
 	"github.com/Kamva/mgm/v2"
 	"github.com/YonchevSimeon/fiber-mongodb-vue/models"
-	"github.com/gofiber/fiber"
+	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
 // GET /api/posts
-func GetAll(ctx *fiber.Ctx) {
+func GetAll(ctx *fiber.Ctx) error {
 	collection := mgm.Coll(&models.Post{})
 
 	posts := []models.Post{}
@@ -16,21 +16,21 @@ func GetAll(ctx *fiber.Ctx) {
 	err := collection.SimpleFind(&posts, bson.D{})
 
 	if err != nil {
-		ctx.Status(500).JSON(fiber.Map{
+		return ctx.Status(500).JSON(fiber.Map{
 			"ok":    false,
 			"error": err.Error(),
 		})
-		return
+		// return
 	}
 
-	ctx.JSON(fiber.Map{
+	return ctx.JSON(fiber.Map{
 		"ok":    true,
 		"posts": posts,
 	})
 }
 
 // GET /api/posts/:id
-func GetById(ctx *fiber.Ctx) {
+func GetById(ctx *fiber.Ctx) error {
 	id := ctx.Params("id")
 
 	post := &models.Post{}
@@ -40,21 +40,20 @@ func GetById(ctx *fiber.Ctx) {
 	err := collection.FindByID(id, post)
 
 	if err != nil {
-		ctx.Status(404).JSON(fiber.Map{
+		return ctx.Status(404).JSON(fiber.Map{
 			"ok":    false,
 			"error": "Post not found.",
 		})
-		return
 	}
 
-	ctx.JSON(fiber.Map{
+	return ctx.JSON(fiber.Map{
 		"ok":   true,
 		"post": post,
 	})
 }
 
 // POST /api/posts
-func Create(ctx *fiber.Ctx) {
+func Create(ctx *fiber.Ctx) error {
 	params := new(struct {
 		Title   string
 		Content string
@@ -63,11 +62,10 @@ func Create(ctx *fiber.Ctx) {
 	ctx.BodyParser(&params)
 
 	if len(params.Title) == 0 || len(params.Content) == 0 {
-		ctx.Status(400).JSON(fiber.Map{
+		return ctx.Status(400).JSON(fiber.Map{
 			"ok":    false,
 			"error": "Title or content not specified.",
 		})
-		return
 	}
 
 	post := models.CreatePost(params.Title, params.Content)
@@ -75,21 +73,20 @@ func Create(ctx *fiber.Ctx) {
 	err := mgm.Coll(post).Create(post)
 
 	if err != nil {
-		ctx.Status(500).JSON(fiber.Map{
+		return ctx.Status(500).JSON(fiber.Map{
 			"ok":    false,
 			"error": err.Error(),
 		})
-		return
 	}
 
-	ctx.JSON(fiber.Map{
+	return ctx.JSON(fiber.Map{
 		"ok":   true,
 		"post": post,
 	})
 }
 
 // PATCH /api/posts/:id
-func Update(ctx *fiber.Ctx) {
+func Update(ctx *fiber.Ctx) error {
 	id := ctx.Params("id")
 
 	post := &models.Post{}
@@ -99,11 +96,10 @@ func Update(ctx *fiber.Ctx) {
 	err := collection.FindByID(id, post)
 
 	if err != nil {
-		ctx.Status(404).JSON(fiber.Map{
+		return ctx.Status(404).JSON(fiber.Map{
 			"ok":    false,
 			"error": "Post not found",
 		})
-		return
 	}
 
 	params := new(struct {
@@ -113,11 +109,10 @@ func Update(ctx *fiber.Ctx) {
 	ctx.BodyParser(&params)
 
 	if len(params.Content) == 0 {
-		ctx.Status(400).JSON(fiber.Map{
+		return ctx.Status(400).JSON(fiber.Map{
 			"ok":    false,
 			"error": "Content not specified.",
 		})
-		return
 	}
 
 	post.Content = params.Content
@@ -125,21 +120,20 @@ func Update(ctx *fiber.Ctx) {
 	err = collection.Update(post)
 
 	if err != nil {
-		ctx.Status(500).JSON(fiber.Map{
+		return ctx.Status(500).JSON(fiber.Map{
 			"ok":    false,
 			"error": err.Error(),
 		})
-		return
 	}
 
-	ctx.JSON(fiber.Map{
+	return ctx.JSON(fiber.Map{
 		"ok":   true,
 		"post": post,
 	})
 }
 
 // DELETE /api/posts/:id
-func Delete(ctx *fiber.Ctx) {
+func Delete(ctx *fiber.Ctx) error {
 	id := ctx.Params("id")
 
 	post := &models.Post{}
@@ -149,24 +143,22 @@ func Delete(ctx *fiber.Ctx) {
 	err := collection.FindByID(id, post)
 
 	if err != nil {
-		ctx.Status(404).JSON(fiber.Map{
+		return ctx.Status(404).JSON(fiber.Map{
 			"ok":    false,
 			"error": "Post not found",
 		})
-		return
 	}
 
 	err = collection.Delete(post)
 
 	if err != nil {
-		ctx.Status(500).JSON(fiber.Map{
+		return ctx.Status(500).JSON(fiber.Map{
 			"ok":    false,
 			"error": err.Error(),
 		})
-		return
 	}
 
-	ctx.JSON(fiber.Map{
+	return ctx.JSON(fiber.Map{
 		"ok":   true,
 		"post": post,
 	})

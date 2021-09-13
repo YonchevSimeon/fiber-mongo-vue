@@ -5,8 +5,9 @@ import (
 	"os"
 
 	"github.com/Kamva/mgm/v2"
-	"github.com/YonchevSimeon/fiber-mongodb-vue/controllers"
-	"github.com/gofiber/fiber"
+	"github.com/YonchevSimeon/fiber-mongodb-vue/middleware"
+	"github.com/YonchevSimeon/fiber-mongodb-vue/routes"
+	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -14,23 +15,17 @@ import (
 func main() {
 	app := fiber.New()
 
-	setUpRoutes(app)
+	middleware.FiberMiddleware(app)
 
-	err := app.Listen(8000)
+	routes.SetUpPrivateRoutes(app)
+	routes.SetUpPublicRoutes(app)
+	routes.NotFoundRoute(app)
+
+	err := app.Listen(":8000")
 
 	if err != nil {
 		panic(err)
 	}
-}
-
-func setUpRoutes(app *fiber.App) {
-	app.Get("/api/posts", controllers.GetAll)
-	app.Get("/api/posts/:id", controllers.GetById)
-	app.Post("/api/posts", controllers.Create)
-	app.Patch("/api/posts/:id", controllers.Update)
-	app.Delete("/api/posts/:id", controllers.Delete)
-	app.Post("/api/login", controllers.Login)
-	app.Post("/api/register", controllers.Register)
 }
 
 func init() {
