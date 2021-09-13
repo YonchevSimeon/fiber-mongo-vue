@@ -8,7 +8,7 @@ type Post struct {
 	Content          string `json:"content" bson:"content"`
 }
 
-func Create(title, content string) *Post {
+func CreatePost(title, content string) *Post {
 	return &Post{
 		Title:   title,
 		Content: content,

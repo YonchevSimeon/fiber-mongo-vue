@@ -70,7 +70,7 @@ func Create(ctx *fiber.Ctx) {
 		return
 	}
 
-	post := models.Create(params.Title, params.Content)
+	post := models.CreatePost(params.Title, params.Content)
 
 	err := mgm.Coll(post).Create(post)
 

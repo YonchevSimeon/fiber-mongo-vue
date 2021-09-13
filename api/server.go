@@ -29,6 +29,8 @@ func setUpRoutes(app *fiber.App) {
 	app.Post("/api/posts", controllers.Create)
 	app.Patch("/api/posts/:id", controllers.Update)
 	app.Delete("/api/posts/:id", controllers.Delete)
+	app.Post("/api/login", controllers.Login)
+	app.Post("/api/register", controllers.Register)
 }
 
 func init() {
