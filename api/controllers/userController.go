@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"errors"
+
 	"github.com/Kamva/mgm/v2"
 	"github.com/YonchevSimeon/fiber-mongodb-vue/models"
 	"github.com/YonchevSimeon/fiber-mongodb-vue/utils"
@@ -24,19 +26,12 @@ func Login(ctx *fiber.Ctx) error {
 
 	usernameErr := collection.FindOne(ctx.Context(), bson.M{"username": params.Username}).Decode(&user)
 
-	if usernameErr != nil {
-		return ctx.Status(400).JSON(fiber.Map{
-			"ok":    false,
-			"error": "Account with this username does NOT exist!",
-		})
-	}
-
 	match := checkPasswordHash(params.Password, user.Password)
 
-	if !match {
+	if !match || usernameErr != nil {
 		return ctx.Status(400).JSON(fiber.Map{
 			"ok":    false,
-			"error": "Wrong password, please try again!",
+			"error": "Wrong username or password, please try again!",
 		})
 	}
 
@@ -68,20 +63,20 @@ func Register(ctx *fiber.Ctx) error {
 	usernameErr := isValidUsername(params.Username)
 	passwordErr := isValidPassword(params.Password)
 
-	if len(emailErr) != 0 {
+	if emailErr != nil {
 		return ctx.Status(400).JSON(fiber.Map{
 			"ok":    false,
-			"error": emailErr,
+			"error": emailErr.Error(),
 		})
-	} else if len(usernameErr) != 0 {
+	} else if usernameErr != nil {
 		return ctx.Status(400).JSON(fiber.Map{
 			"ok":    false,
-			"error": usernameErr,
+			"error": usernameErr.Error(),
 		})
-	} else if len(passwordErr) != 0 {
+	} else if passwordErr != nil {
 		return ctx.Status(400).JSON(fiber.Map{
 			"ok":    false,
-			"error": passwordErr,
+			"error": passwordErr.Error(),
 		})
 	}
 
@@ -104,30 +99,30 @@ func Register(ctx *fiber.Ctx) error {
 
 }
 
-func isValidEmail(email string) string {
-	// TODO: check if email is valid
+func isValidEmail(email string) error {
+	// TODO: check if email is valid // may be regex
 	if len(email) == 0 {
-		return "Please enter a valid email!"
+		return errors.New("please enter a valid email")
 	}
-	return ""
+	return nil
 }
 
-func isValidUsername(username string) string {
+func isValidUsername(username string) error {
 	// TODO: check if there is an user with this username
 
-	return ""
+	return nil
 }
 
-func isValidPassword(password string) string {
+func isValidPassword(password string) error {
 	// TODO: check if it contains numbers
 	// TODO: check if it contains symbols
 
 	passwordLength := len(password)
 	if passwordLength < 8 || passwordLength > 16 {
-		return "The password should be between 8 and 16 characters long!"
+		return errors.New("the password should be between 8 and 16 characters long")
 	}
 
-	return ""
+	return nil
 }
 
 func hashPassword(password string) (string, error) {
