@@ -2,6 +2,7 @@ import Vue from 'vue';
 import Router from 'vue-router';
 import Posts from './components/Posts';
 import Login from './components/Login';
+import Register from './components/Register';
 import { store } from './stores/store';
 
 Vue.use(Router);
@@ -20,6 +21,12 @@ export const router = new Router({
       path: '/login',
       name: 'login',
       component: Login,
+    },
+
+    {
+      path: '/register',
+      name: 'register',
+      component: Register,
     },
 
     { path: '*', redirect: '/' },

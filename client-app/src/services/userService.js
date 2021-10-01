@@ -3,6 +3,7 @@
 export const userService = {
   login,
   logout,
+  register,
 };
 
 async function login(username, password) {
@@ -22,6 +23,27 @@ async function login(username, password) {
     });
 }
 
-function logout() {
+async function logout() {
   // localStorage.removeItem('user');
+}
+
+async function register(username, email, password) {
+  const requestedOptions = {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      email: email,
+      username: username,
+      password: password,
+    }),
+  };
+
+  return await fetch('/api/register', requestedOptions)
+    .then((response) => response.json())
+    .then((data) => {
+      return data;
+    })
+    .catch((err) => {
+      return err;
+    });
 }
