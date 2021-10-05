@@ -61,13 +61,14 @@ export default {
     };
   },
   methods: {
-    ...mapMutations(["setUser", "setToken"]),
+    ...mapMutations(["setUsername", "setToken", "setUserId"]),
 
     async login() {
       const response = await userService.login(this.username, this.password);
       if (response.token) {
-        this.setUser(this.username);
+        this.setUsername(response.username);
         this.setToken(response.token);
+        this.setUserId(response.userId);
 
         this.$router.push({
           name: "home",

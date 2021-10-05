@@ -28,7 +28,10 @@
 
     <v-app-bar app color="primary accent-20" dense dark>
       <v-spacer></v-spacer>
-      <v-toolbar-title>Fiber Forum</v-toolbar-title>
+      <v-toolbar-title v-if="isLoggedIn"
+        >Welcome, {{ getLoggedInUserName }}</v-toolbar-title
+      >
+      <v-toolbar-title v-else>Fiber Forum</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-menu left bottom>
         <template v-slot:activator="{ on, attrs }">
@@ -70,12 +73,13 @@ export default {
     return {
       items: [
         { title: "Posts", icon: "mdi-view-dashboard", route: "/" },
+        { title: "My Posts", icon: "mdi-view-dashboard", route: "/posts" },
         { title: "About", icon: "mdi-help-box" },
       ],
     };
   },
   computed: {
-    ...mapGetters(["isLoggedIn"]),
+    ...mapGetters(["isLoggedIn", "getLoggedInUserName"]),
   },
   methods: {
     async logout() {

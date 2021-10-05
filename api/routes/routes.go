@@ -21,6 +21,8 @@ func SetUpPrivateRoutes(app *fiber.App) {
 	route.Post("/posts", middleware.JWTProtected(), controllers.Create)
 	route.Patch("/posts/:id", middleware.JWTProtected(), controllers.Update)
 	route.Delete("/posts/:id", middleware.JWTProtected(), controllers.Delete)
+
+	route.Get("/user/:id/posts", middleware.JWTProtected(), controllers.GetByUserId)
 }
 
 func NotFoundRoute(app *fiber.App) {
