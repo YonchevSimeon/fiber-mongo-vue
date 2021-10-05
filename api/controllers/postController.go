@@ -55,6 +55,7 @@ func GetById(ctx *fiber.Ctx) error {
 // POST /api/posts
 func Create(ctx *fiber.Ctx) error {
 	params := new(struct {
+		UserId  string
 		Title   string
 		Content string
 	})
@@ -68,7 +69,7 @@ func Create(ctx *fiber.Ctx) error {
 		})
 	}
 
-	post := models.CreatePost(params.Title, params.Content)
+	post := models.CreatePost(params.UserId, params.Title, params.Content)
 
 	err := mgm.Coll(post).Create(post)
 
@@ -161,5 +162,42 @@ func Delete(ctx *fiber.Ctx) error {
 	return ctx.JSON(fiber.Map{
 		"ok":   true,
 		"post": post,
+	})
+}
+
+// GET /api/user/:id/posts
+func GetByUserId(ctx *fiber.Ctx) error {
+
+	userId := ctx.Params("id")
+
+	user := &models.User{}
+
+	userCollection := mgm.Coll(user)
+
+	userErr := userCollection.FindByID(userId, user)
+
+	if userErr != nil {
+		return ctx.Status(404).JSON(fiber.Map{
+			"ok":    false,
+			"error": "User not found",
+		})
+	}
+
+	collection := mgm.Coll(&models.Post{})
+
+	posts := []models.Post{}
+
+	err := collection.SimpleFind(&posts, bson.D{{"userId", userId}})
+
+	if err != nil {
+		return ctx.Status(500).JSON(fiber.Map{
+			"ok":    false,
+			"error": err.Error(),
+		})
+	}
+
+	return ctx.JSON(fiber.Map{
+		"ok":    true,
+		"posts": posts,
 	})
 }

@@ -1,11 +1,15 @@
 const state = {
-  user: null,
+  userId: null,
+  username: null,
   token: null,
 };
 
 const mutations = {
-  setUser(state, user) {
-    state.user = user;
+  setUserId(state, userId) {
+    state.userId = userId;
+  },
+  setUsername(state, username) {
+    state.username = username;
   },
   setToken(state, token) {
     state.token = token;
@@ -18,6 +22,12 @@ const getters = {
   },
   getLoggedInUserToken(state) {
     return state.token;
+  },
+  getLoggedInUserName(state) {
+    return state.username;
+  },
+  getLoggedInUserId(state) {
+    return state.userId;
   },
 };
 

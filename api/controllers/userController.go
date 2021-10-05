@@ -44,8 +44,10 @@ func Login(ctx *fiber.Ctx) error {
 	}
 
 	return ctx.JSON(fiber.Map{
-		"ok":    true,
-		"token": token,
+		"ok":       true,
+		"token":    token,
+		"username": user.Username,
+		"userId":   user.ID,
 	})
 
 }
