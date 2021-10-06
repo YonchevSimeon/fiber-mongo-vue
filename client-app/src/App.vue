@@ -83,7 +83,8 @@ export default {
   },
   methods: {
     async logout() {
-      // TOOD Logout user
+      localStorage.clear();
+      await this.navToLogin();
     },
     async navToRegister() {
       this.$router.push({
