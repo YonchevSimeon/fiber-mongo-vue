@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <v-navigation-drawer app>
+    <v-navigation-drawer app v-model="drawer">
       <v-list-item>
         <v-list-item-content>
           <v-list-item-title class="text-h6"> Menu </v-list-item-title>
@@ -27,6 +27,7 @@
     </v-navigation-drawer>
 
     <v-app-bar app color="primary accent-20" dense dark>
+      <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
       <v-spacer></v-spacer>
       <v-toolbar-title v-if="isLoggedIn"
         >Welcome, {{ getLoggedInUserName }}</v-toolbar-title
@@ -71,6 +72,7 @@ export default {
   name: "App",
   data() {
     return {
+      drawer: true,
       items: [
         { title: "Posts", icon: "mdi-view-dashboard", route: "/" },
         { title: "My Posts", icon: "mdi-view-dashboard", route: "/posts" },
